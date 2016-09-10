@@ -1,5 +1,5 @@
 --tarot Bot
---V: 1.00
+--V: 1.10
 --Coded By: ModernSaint
 
 --Basic Statements--
@@ -133,6 +133,7 @@ object.nRicochetUp			= 35
 object.nFarScryUp 			= 25
 object.nBoundByFateUp		= 15
 object.nEPup				= 15
+object.nSicariusUp		= 10
 
 -- bonus aggression points that are applied to the bot upon successfully using a skill/item
 object.nRicochetUse			= 50
@@ -140,12 +141,14 @@ object.nFarScryUse 			= 30
 object.nBoundByFateUse 		= 40
 object.nChanceUse			= 30
 object.nEPUse				= 25
+object.nSicariusUse		=15
 
 -- thresholds of aggression the bot must reach to use these abilities
 object.nRicochetThreshold		= 40
 object.nFarScryThreshold 		= 25
 object.nBoundByFateThreshold	= 55
 object.nEPThreshold				= 25
+object.nSicariusThreshold	= 30
 
 -- Additional Modifiers (items, etc.)
 
@@ -171,6 +174,10 @@ local function AbilitiesUpUtilityFn()
 	
 	if object.itemElderParasite and object.itemElderParasite:CanActivate() then
 		nUtility = nUtility + object.nEPUp
+	end
+	
+	if object.itemSicarius and object.itemSicarius:CanActivate() then
+		nUtility = nUtility + object.nSicariusUp
 	end
 	
 	return nUtility
@@ -204,6 +211,10 @@ self:oncombateventOld(EventData)
 	elseif EventData.Type == "Item" then
 		if core.itemElderParasite ~= nil and EventData.SourceUnit == core.unitSelf:GetUniqueID() and EventData.InflictorName == core.itemElderParasite:GetName() then
 			addBonus = addBonus + object.nEPUse
+		end
+		
+		if core.itemSicarius ~= nil and EventData.SourceUnit == core.unitSelf:GetUniqueID() and EventData.InflictorName == core.itemSicarius:GetName() then
+			addBonus = addBonus + object.nSicariusUse
 		end
 	end
 
@@ -426,6 +437,11 @@ function behaviorLib.customPushExecute(botBrain)
 	--Activate ElderParasite when pushing (hopefully he is already hitting creeps)
 	if itemElderParasite and itemElderParasite:CanActivate() then
 		bActionTaken = core.OrderItemClamp(botBrain, core.unitSelf, itemElderParasite)
+	end
+	
+	--Activate Geo's for illusion auto attacks
+	if not bActionTaken and itemSicarius and itemSicarius:CanActivate() then
+		bActionTaken = core.OrderItemClamp(botBrain, core.unitSelf, itemSicarius)
 	end
 	
 	return bSuccess
